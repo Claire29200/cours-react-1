@@ -37,7 +37,10 @@ const Countries = () => {
         ))}
       </ul>
       <ul>
-        {data.slice(0, rangeValue).map((country, index) => (
+        {data
+        .filter((country) => country.continents[0].includes(selectedRadio))
+        .sort((a,b) => b - a)
+        .slice(0, rangeValue).map((country, index) => (
           <Card key={index} country={country} />
         ))}
       </ul>
