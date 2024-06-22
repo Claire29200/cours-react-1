@@ -1,25 +1,56 @@
-import React from 'react';
-import Logo from '../components/Logo';
-import Navigation from '../components/Navigation';
+import React, { useEffect, useState } from "react";
+import Logo from "../components/Logo";
+import Navigation from "../components/Navigation";
+import axios from "axios";
+import Article from "../components/Article";
 
 const Blog = () => {
-    return (
-      <div className="blog-container">
-        <Logo />
-        <Navigation />
-        <h1>Blog</h1>
+  const [blogData, setBlogData] = useState([]);
+  const [content, setContent] = useState("");
+  const [error, setError] = useState(false);
 
-        <form>
-            <input type="text" placeholder="Nom"/>
-            <textarea placeholder="Message" ></textarea>
-            <input type="submit" value="Envoyer" />
+  const getData = () => {
+    axios
+      .get("http://localhost:3003/articles")
+      .then((res) => setBlogData(res.data));
+  };
+  useEffect(() => getData(), []);
 
-        </form>
-        <ul>
-            
-        </ul>
-      </div>
-    );
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (content.length < 140) {
+      setError(true);
+    } else {
+      axios.post("http://localhost:3003/articles");
+      setError(false);
+    }
+  };
+  return (
+    <div className="blog-container">
+      <Logo />
+      <Navigation />
+      <h1>Blog</h1>
+
+      <form onSubmit={(e) => handleSubmit(e)}>
+        <input type="text" placeholder="Nom" />
+        <textarea
+          style={{ border: error ? "1px solid red" : "1px solid #61dafb" }}
+          placeholder="Message"
+          onChangeCapture={(e) => setContent(e.target.value)}
+        ></textarea>
+        {error && <p>Veuillez écrire un minimu de 140 caractères</p>}
+        <input type="submit" value="Envoyer" />
+      </form>
+      <ul>
+        {blogData
+          .sort((a, b) => b.date - a.date)
+          .map((article) => (
+            <Article key={article.id} article={article} />
+          ))}
+      </ul>
+    </div>
+  );
 };
 
 export default Blog;
